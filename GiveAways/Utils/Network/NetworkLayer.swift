@@ -6,25 +6,33 @@
 //
 
 import Foundation
-import Alamofire
+import Moya
 import Combine
 
 public class NetworkService {
     
-    private let session: URLSession
+    private let provider: MoyaProvider<MultiTarget>
     
-    public init(session: URLSession = .shared) {
-        self.session = session
+    public init(provider: MoyaProvider<MultiTarget> = MoyaProvider<MultiTarget>()) {
+        self.provider = provider
     }
     
-    public func sendRequest<ResponseType: Decodable>(request: URLRequest) -> AnyPublisher<ResponseType, HTTPNetworkError> {
-        return session.dataTaskPublisher(for: request)
-            .map { $0.data } // Extract the data from the response
-            .decode(type: ResponseType.self, decoder: JSONDecoder()) // Decode the data into the ResponseType
-            .mapError { error in
-                // Map any errors to HTTPNetworkError
-                error as? HTTPNetworkError ?? .other(error.localizedDescription)
+    public func sendRequest<ResponseType: Decodable>(target: TargetType) -> AnyPublisher<ResponseType, HTTPNetworkError> {
+        return Future<ResponseType, HTTPNetworkError> { promise in
+            self.provider.request(MultiTarget(target)) { result in
+                switch result {
+                case .success(let response):
+                    do {
+                        let decodedResponse = try JSONDecoder().decode(ResponseType.self, from: response.data)
+                        promise(.success(decodedResponse))
+                    } catch {
+                        promise(.failure(.unableToDecode(error)))
+                    }
+                case .failure(let error):
+                    promise(.failure(.other(error.localizedDescription)))
+                }
             }
-            .eraseToAnyPublisher() // Erase the publisher type to make it simpler to use
+        }
+        .eraseToAnyPublisher()
     }
 }

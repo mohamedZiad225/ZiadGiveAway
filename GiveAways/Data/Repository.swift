@@ -18,14 +18,14 @@ class Repository {
         self.networkService = networkService
     }
 }
-// MARK: - HomeNetworkContract
 
+// MARK: - HomeRepositoryProtocol
 extension Repository: HomeRepositoryProtocol {
     func getFilteredGames(platform: String) -> AnyPublisher<[GiveawayDTO], HTTPNetworkError> {
-        networkService.sendRequest(request: URLRequestBuilder.build(baseUrl: "https://www.gamerpower.com", path: "/api/giveaways", parameters: ["platform": platform]))
+        return networkService.sendRequest(target: GiveawayAPI.getFilteredGames(platform: platform))
     }
     
     func getGames() -> AnyPublisher<[GiveawayDTO], HTTPNetworkError> {
-        networkService.sendRequest(request: URLRequestBuilder.build(baseUrl: "https://www.gamerpower.com", path: "/api/giveaways"))
+        return networkService.sendRequest(target: GiveawayAPI.getGames)
     }
 }
