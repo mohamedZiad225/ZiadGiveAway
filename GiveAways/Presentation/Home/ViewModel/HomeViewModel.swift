@@ -8,26 +8,46 @@ import Foundation
 import Combine
 
 public class HomeViewModel: ObservableObject {
-    private var cancellables = Set<AnyCancellable>()
-    private let homeUseCase: HomeUseCaseContract
+    // MARK: - Published Properties for the View
     @Published public var homeGames: [HomeUIModel] = []
     @Published public var isLoading: Bool = false
     
- public init(homeUseCase: HomeUseCaseContract) {
+    // MARK: - Private Properties
+    private var cancellables = Set<AnyCancellable>()
+    private let homeUseCase: HomeUseCaseContract
+    
+    public init(homeUseCase: HomeUseCaseContract) {
         self.homeUseCase = homeUseCase
         subscribeToLoadingState()
         subscribeToGames()
     }
     
+    
+    func filterGames(_ filterBy: HomeFilterTypes) {
+        homeUseCase.getFilterItems(filterBy)
+    }
+    
+    func getGameDTO(_ itemId: Int) -> GiveawayDTO {
+        return homeUseCase.getSelectedItemDto(itemId)
+    }
+    
+    func didFavourite(_ itemId: Int) {
+        homeUseCase.didFavouriteItem(itemId)
+    }
+    
+    func searchByText(_ text: String) {
+        homeUseCase.searchGames(query: text)
+    }
+    
     private func subscribeToLoadingState() {
-          homeUseCase.loading
-              .receive(on: DispatchQueue.main)
-              .sink { [weak self] isLoading in
-                  guard let self = self else {return}
-                  self.isLoading = isLoading
-              }
-              .store(in: &cancellables)
-      }
+        homeUseCase.loading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self = self else {return}
+                self.isLoading = isLoading
+            }
+            .store(in: &cancellables)
+    }
     
     private func subscribeToGames() {
         homeUseCase.gamesSubject
@@ -46,23 +66,6 @@ public class HomeViewModel: ObservableObject {
             })
             .store(in: &cancellables)
     }
-    
-    func filterGames(_ filterBy: HomeFilterTypes) {
-           homeUseCase.getFilterItems(filterBy)
-       }
-    
-    func getGameDTO(_ itemId: Int) -> GiveawayDTO {
-        return homeUseCase.getSelectedItemDto(itemId)
-    }
-    
-    func didFavourite(_ itemId: Int) {
-        homeUseCase.didFavouriteItem(itemId)
-    }
-    
-    func searchByText(_ text: String) {
-        homeUseCase.searchGames(query: text)
-    }
-
 }
 
 
