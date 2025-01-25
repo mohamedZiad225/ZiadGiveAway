@@ -1,0 +1,29 @@
+{
+  "configurations" : [
+    {
+      "id" : "EF8C30F5-4778-40A9-9329-73A74CF87F57",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:GiveAways.xcodeproj",
+      "identifier" : "15D7F7712D411B5C0035A05D",
+      "name" : "GiveAways"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:GiveAways.xcodeproj",
+        "identifier" : "157EB0362D439B2B00C6071D",
+        "name" : "GiveAwaysTests"
+      }
+    }
+  ],
+  "version" : 1
+}
